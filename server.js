@@ -38,34 +38,32 @@ exports.handler = async (event, context) => {
       'l Tennessee'
     ];
 
-    for (const playerName of players) {
+    const summonerPromises = players.map(async (playerName) => {
       const encodedName = encodeURIComponent(playerName);
       const summonerData = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${encodedName}?api_key=${apiKey}`);
       const summonerId = summonerData.data.id;
 
-      // Utilisez l'ID d'invocateur pour obtenir les informations de rang.
       const rankInfo = await getRank(summonerId);
 
-      // Si rankInfo est null, cela signifie que le joueur n'a pas de classement en solo/duo ou qu'une erreur s'est produite.
       if (rankInfo) {
         playersData[playerName] = {
           summonerId: summonerId,
-          wins: rankInfo.wins, // Nombre total de victoires en solo/duo queue.
-          losses: rankInfo.losses, // Nombre total de défaites en solo/duo queue.
-          winrate: ((rankInfo.wins / (rankInfo.wins + rankInfo.losses)) * 100).toFixed(2), // Calcul du taux de victoire.
-          rank: rankInfo, // Informations de classement en solo/duo queue.
+          wins: rankInfo.wins,
+          losses: rankInfo.losses,
+          winrate: ((rankInfo.wins / (rankInfo.wins + rankInfo.losses)) * 100).toFixed(2),
+          rank: rankInfo,
         };
       }
-    }
+    });
 
-    console.log('Players Data:', playersData); // Affichez les données des joueurs dans la console.
+    await Promise.all(summonerPromises);
 
     return {
       statusCode: 200,
       body: JSON.stringify(playersData),
     };
   } catch (error) {
-    console.error('Error:', error);
+    console.error(error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal server error' }),
