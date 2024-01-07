@@ -3,9 +3,9 @@ const axios = require('axios');
 exports.handler = async (event, context) => {
   const apiKey = "RGAPI-50e3a901-6822-487d-ad53-11165f65a852";
 
-  const getRank = (summonerId) => {
+  const getRank = async (summonerId) => {
     try {
-      const rankResponse = axios.get(`https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}?api_key=${apiKey}`);
+      const rankResponse = await axios.get(`https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}?api_key=${apiKey}`);
       const soloDuoRankInfo = rankResponse.data.find(queue => queue.queueType === 'RANKED_SOLO_5x5');
       return soloDuoRankInfo ? {
         tier: soloDuoRankInfo.tier,
@@ -38,13 +38,13 @@ exports.handler = async (event, context) => {
       'l Tennessee'
     ];
 
-    for (const playerName of players) {
+    const promises = players.map(async (playerName) => {
       const encodedName = encodeURIComponent(playerName);
-      const summonerData = axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${encodedName}?api_key=${apiKey}`);
+      const summonerData = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${encodedName}?api_key=${apiKey}`);
       const summonerId = summonerData.data.id;
 
       // Utilisez l'ID d'invocateur pour obtenir les informations de rang.
-      const rankInfo = getRank(summonerId);
+      const rankInfo = await getRank(summonerId);
 
       // Si rankInfo est null, cela signifie que le joueur n'a pas de classement en solo/duo ou qu'une erreur s'est produite.
       if (rankInfo) {
@@ -56,7 +56,10 @@ exports.handler = async (event, context) => {
           rank: rankInfo, // Informations de classement en solo/duo queue.
         };
       }
-    }
+    });
+
+    // Attendre que toutes les promesses soient résolues
+    await Promise.all(promises);
 
     return {
       statusCode: 200,
