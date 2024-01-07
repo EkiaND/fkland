@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
       'l Tennessee'
     ];
 
-    for (const playerName of players) {
+    await Promise.all(players.map(async (playerName) => {
       const encodedName = encodeURIComponent(playerName);
       const summonerData = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${encodedName}?api_key=${apiKey}`);
       const summonerId = summonerData.data.id;
@@ -56,7 +56,7 @@ exports.handler = async (event, context) => {
           rank: rankInfo, // Informations de classement en solo/duo queue.
         };
       }
-    }
+    }));
 
     return {
       statusCode: 200,
