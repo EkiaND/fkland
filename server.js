@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 exports.handler = async (event, context) => {
-  const apiKey = "RGAPI-92124958-9f92-4b13-ae84-f729c50d7088";
+  const apiKey = "RGAPI-50e3a901-6822-487d-ad53-11165f65a852";
 
   const getRank = async (summonerId) => {
     try {
