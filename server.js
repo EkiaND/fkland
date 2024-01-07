@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
       'l Tennessee'
     ];
 
-    await Promise.all(players.map(async (playerName) => {
+    for (const playerName of players) {
       const encodedName = encodeURIComponent(playerName);
       const summonerData = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${encodedName}?api_key=${apiKey}`);
       const summonerId = summonerData.data.id;
@@ -56,14 +56,16 @@ exports.handler = async (event, context) => {
           rank: rankInfo, // Informations de classement en solo/duo queue.
         };
       }
-    }));
+    }
+
+    console.log('Players Data:', playersData); // Affichez les données des joueurs dans la console.
 
     return {
       statusCode: 200,
       body: JSON.stringify(playersData),
     };
   } catch (error) {
-    console.error(error);
+    console.error('Error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal server error' }),
