@@ -25,6 +25,7 @@ exports.handler = async (event, context) => {
   try {
     const players = [
       'ECI PURPLE',
+      'DontFlameILearn'
       'Møuki',
       'JLRubben',
       'fluff my ball',
@@ -32,7 +33,8 @@ exports.handler = async (event, context) => {
       'Ekia',
       'Damasterclass',
       'MTS42z',
-      'CriKxS2'
+      'CriKxS2',
+      'Fakemonster'
     ];
 
     for (const playerName of players) {
