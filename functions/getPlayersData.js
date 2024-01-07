@@ -25,7 +25,7 @@ exports.handler = async (event, context) => {
   try {
     const players = [
       'ECI PURPLE',
-      'DontFlameILearn'
+      'DontFlameILearn',
       'Møuki',
       'JLRubben',
       'fluff my ball',
