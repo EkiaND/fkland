@@ -1,2 +1,5 @@
 [build]
   functions = "functions"  # Spécifie le répertoire des fonctions Netlify
+  [[functions]]
+  name = "getPlayersData"
+  timeout = 30
