@@ -38,28 +38,31 @@ exports.handler = async (event, context) => {
       'l Tennessee'
     ];
 
-    const promises = players.map(async (playerName) => {
+    const requestsPerSecond = 20; // Number of requests to make per second
+    const rateLimit = 1000 / requestsPerSecond; // Calculate the delay in milliseconds
+
+    for (const playerName of players) {
       const encodedName = encodeURIComponent(playerName);
       const summonerData = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${encodedName}?api_key=${apiKey}`);
       const summonerId = summonerData.data.id;
 
-      // Utilisez l'ID d'invocateur pour obtenir les informations de rang.
+      // Utilize the ID to get ranking information.
       const rankInfo = await getRank(summonerId);
 
-      // Si rankInfo est null, cela signifie que le joueur n'a pas de classement en solo/duo ou qu'une erreur s'est produite.
+      // If rankInfo is null, it means the player has no ranking in solo/duo or an error occurred.
       if (rankInfo) {
         playersData[playerName] = {
           summonerId: summonerId,
-          wins: rankInfo.wins, // Nombre total de victoires en solo/duo queue.
-          losses: rankInfo.losses, // Nombre total de défaites en solo/duo queue.
-          winrate: ((rankInfo.wins / (rankInfo.wins + rankInfo.losses)) * 100).toFixed(2), // Calcul du taux de victoire.
-          rank: rankInfo, // Informations de classement en solo/duo queue.
+          wins: rankInfo.wins, // Total wins in solo/duo queue.
+          losses: rankInfo.losses, // Total losses in solo/duo queue.
+          winrate: ((rankInfo.wins / (rankInfo.wins + rankInfo.losses)) * 100).toFixed(2), // Win rate calculation.
+          rank: rankInfo, // Ranking information in solo/duo queue.
         };
       }
-    });
 
-    // Attendre que toutes les promesses soient résolues
-    await Promise.all(promises);
+      // Pause for the rate limit to avoid overloading the API.
+      await delay(rateLimit);
+    }
 
     return {
       statusCode: 200,
@@ -73,3 +76,7 @@ exports.handler = async (event, context) => {
     };
   }
 };
+
+async function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
